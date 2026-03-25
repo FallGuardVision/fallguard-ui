@@ -1,17 +1,16 @@
-# BlueWatch-UI
+# Fallguard-UI
 
 Web Dashboard for AI Monitoring System
 
----
 
-## Features
+# Purpose
 
-- Web Dashboard Interface
-- Live Feed Display
-- Bounding Box Overlay (Real-Time Detection Visualization)
-- Timestamp Display
-- Alert Notification Panel
-- Login & Authentication
-- Role-Based Access Control (RBAC)
+Monitoring dashboard
 
----
+# Features
+- real-time alert popup
+- skeleton visualization panel
+- fall history timeline
+- patient status indicator
+- nurse notification UI
+
