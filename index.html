@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FallGuard Vision Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="dashboard-header">
+        <h1>FallGuard Patient Status Overview</h1>
+        <div class="status-indicator">● System Active</div>
+    </div>
+    
+    <div class="panel-container">
+        <!-- Event Timeline -->
+        <div class="panel">
+            <h2>Real-time Alerts</h2>
+            <ul id="alerts-list">
+                <!-- Javascript will populate alerts here -->
+                <li class="alert-item waiting">Waiting for edge device payloads...</li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
