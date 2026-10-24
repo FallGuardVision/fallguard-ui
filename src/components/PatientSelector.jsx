@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { UserPlus, UserCheck, ShieldAlert, Activity, Search } from 'lucide-react';
 
-const API_URL = 'http://127.0.0.1:8000/patients';
+const API_URL = `${import.meta.env.VITE_API_URL ?? 'http://127.0.0.1:8000'}/patients`;
 
 /**
  * Patient intake portal shown before starting or switching monitoring sessions.
@@ -22,7 +22,7 @@ function PatientSelector({ onSelect }) {
         setLoading(false);
       })
       .catch(() => {
-        setError('Could not reach backend API server at http://127.0.0.1:8000.');
+        setError(`Could not reach backend API server at ${API_URL}.`);
         setLoading(false);
       });
   }, []);
