@@ -15,13 +15,15 @@ function usePredictionSocket(patientId) {
   useEffect(() => {
     if (patientId === undefined || patientId === null) return;
 
-    const url = `ws://127.0.0.1:8000/ws/session?patient_id=${patientId}`;
+    const httpBase = import.meta.env.VITE_API_URL ?? 'http://127.0.0.1:8000';
+    const wsBase = httpBase.replace(/^https/, 'wss').replace(/^http/, 'ws');
+    const url = `${wsBase}/ws/session?patient_id=${patientId}`;
     const ws = new WebSocket(url);
     wsRef.current = ws;
 
     ws.onopen = () => setConnected(true);
     ws.onclose = () => setConnected(false);
-    ws.onerror = () => setError('WebSocket error -- is the backend running on :8000?');
+    ws.onerror = () => setError(`WebSocket connection failed: ${url}`);
 
     ws.onmessage = (event) => {
       try {
