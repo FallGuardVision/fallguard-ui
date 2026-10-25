@@ -1,41 +1,37 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 :root {
-  /* Dark Navy / Charcoal Clinical Palette */
-  --bg: #0b0f19;
-  --bg-sidebar: #070a12;
-  --surface: #111827;
-  --surface-card: #131c2e;
-  --surface-hover: #1e293b;
+  --bg: #09090b;
+  --bg-sidebar: #0c0c10;
+  --surface: #141418;
+  --surface-card: #16161c;
+  --surface-hover: #22222a;
   --border: rgba(255, 255, 255, 0.08);
-  --border-active: rgba(14, 165, 233, 0.4);
-  
-  /* Text */
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
-  --text-muted: #64748b;
+  --border-active: rgba(45, 212, 191, 0.45);
 
-  /* Accents */
-  --accent: #0ea5e9;
-  --accent-glow: rgba(14, 165, 233, 0.15);
-  --cyan: #38bdf8;
-  
-  /* Class & Severity Colors */
-  --stable: #22c55e;
-  --stable-bg: rgba(34, 197, 94, 0.12);
-  --stable-border: rgba(34, 197, 94, 0.3);
+  --text-primary: #f4f4f5;
+  --text-secondary: #a1a1aa;
+  --text-muted: #71717a;
 
-  --high-risk: #f59e0b;
-  --high-risk-bg: rgba(245, 158, 11, 0.12);
-  --high-risk-border: rgba(245, 158, 11, 0.3);
+  --accent: #2dd4bf;
+  --accent-glow: rgba(45, 212, 191, 0.14);
+  --cyan: #5eead4;
 
-  --fall: #ef4444;
-  --fall-bg: rgba(239, 68, 68, 0.16);
-  --fall-border: rgba(239, 68, 68, 0.4);
+  --stable: #34d399;
+  --stable-bg: rgba(52, 211, 153, 0.12);
+  --stable-border: rgba(52, 211, 153, 0.3);
 
-  --immobile: #a855f7;
-  --immobile-bg: rgba(168, 85, 247, 0.12);
-  --immobile-border: rgba(168, 85, 247, 0.3);
+  --high-risk: #fbbf24;
+  --high-risk-bg: rgba(251, 191, 36, 0.12);
+  --high-risk-border: rgba(251, 191, 36, 0.3);
+
+  --fall: #f87171;
+  --fall-bg: rgba(248, 113, 113, 0.16);
+  --fall-border: rgba(248, 113, 113, 0.4);
+
+  --immobile: #c084fc;
+  --immobile-bg: rgba(192, 132, 252, 0.12);
+  --immobile-border: rgba(192, 132, 252, 0.3);
 
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   color-scheme: dark;
@@ -61,26 +57,24 @@ code, pre, .mono-font {
   font-family: 'JetBrains Mono', monospace;
 }
 
-/* Custom Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(15, 23, 42, 0.6);
+  background: rgba(9, 9, 11, 0.8);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: #3f3f46;
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #475569;
+  background: #52525b;
 }
 
-/* Status Badges */
 .status-badge {
   display: inline-flex;
   align-items: center;
@@ -118,13 +112,12 @@ code, pre, .mono-font {
   border: 1px solid var(--immobile-border);
 }
 
-/* Base Card Styling */
 .clinical-card {
   background: var(--surface-card);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: 10px;
   padding: 16px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
   position: relative;
   overflow: hidden;
 }
@@ -149,13 +142,12 @@ code, pre, .mono-font {
   gap: 6px;
 }
 
-/* Animations */
 @keyframes pulse-red {
   0%, 100% {
-    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+    box-shadow: 0 0 0 0 rgba(248, 113, 113, 0.4);
   }
   50% {
-    box-shadow: 0 0 0 6px rgba(239, 68, 68, 0);
+    box-shadow: 0 0 0 6px rgba(248, 113, 113, 0);
   }
 }
 

@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { History, AlertCircle, Clock, CheckCircle2 } from 'lucide-react';
+import { apiUrl } from '../config';
 
-const API_URL = 'http://127.0.0.1:8000/events';
+const API_URL = apiUrl('/events');
 
 const CLASS_BADGE_STYLE = {
   HIGH_RISK: 'high-risk',
@@ -40,30 +41,27 @@ function EventHistory({ refreshTrigger, patientId, patientName }) {
       setError(null);
       setLoading(false);
     } catch (e) {
-      setError('Could not reach backend for event history log.');
+      setError('Could not load events.');
       setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchEvents();
-  }, [refreshTrigger, patientId]);
-
-  useEffect(() => {
     const interval = setInterval(fetchEvents, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [refreshTrigger, patientId]);
 
   return (
     <div className="clinical-card">
       <div className="clinical-card-header">
         <div className="section-title">
           <History size={15} style={{ color: 'var(--accent)' }} />
-          <span>Clinical Event History Timeline — {patientName || 'Active Patient'}</span>
+          <span>Events — {patientName || 'Patient'}</span>
         </div>
 
         <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-          {events.length} LOGGED EVENTS
+          {events.length}
         </div>
       </div>
 
@@ -76,14 +74,14 @@ function EventHistory({ refreshTrigger, patientId, patientName }) {
 
       {loading && (
         <p style={{ color: 'var(--text-muted)', fontSize: 12, padding: '12px 0' }}>
-          Loading telemetry event records...
+          Loading events...
         </p>
       )}
 
       {!loading && events.length === 0 && !error && (
         <div style={{ textAlign: 'center', padding: '24px 0', color: 'var(--text-muted)', fontSize: 13 }}>
           <CheckCircle2 size={24} style={{ color: 'var(--stable)', marginBottom: 6 }} />
-          <p>No critical fall or high-risk events logged for this patient session.</p>
+          <p>No alerts yet.</p>
         </div>
       )}
 
@@ -92,10 +90,9 @@ function EventHistory({ refreshTrigger, patientId, patientName }) {
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: 12 }}>
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border)', color: 'var(--text-muted)' }}>
-                <th style={{ padding: '8px 4px', fontWeight: 600 }}>EVENT TYPE</th>
-                <th style={{ padding: '8px 4px', fontWeight: 600 }}>CONFIDENCE</th>
-                <th style={{ padding: '8px 4px', fontWeight: 600 }}>TIMESTAMP</th>
-                <th style={{ padding: '8px 4px', fontWeight: 600, textAlign: 'right' }}>SEVERITY</th>
+                <th style={{ padding: '8px 4px', fontWeight: 600 }}>Type</th>
+                <th style={{ padding: '8px 4px', fontWeight: 600 }}>Confidence</th>
+                <th style={{ padding: '8px 4px', fontWeight: 600 }}>Time</th>
               </tr>
             </thead>
             <tbody>
@@ -116,20 +113,6 @@ function EventHistory({ refreshTrigger, patientId, patientName }) {
                         <Clock size={12} />
                         {formatTime(evt.timestamp)}{' '}
                         <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>{formatDate(evt.timestamp)}</span>
-                      </span>
-                    </td>
-                    <td style={{ padding: '10px 4px', textAlign: 'right', fontWeight: 600 }}>
-                      <span
-                        style={{
-                          fontSize: 10,
-                          padding: '2px 6px',
-                          borderRadius: 3,
-                          background: evt.predicted_class === 'FALL' ? 'var(--fall-bg)' : 'var(--high-risk-bg)',
-                          color: evt.predicted_class === 'FALL' ? 'var(--fall)' : 'var(--high-risk)',
-                          border: '1px solid ' + (evt.predicted_class === 'FALL' ? 'var(--fall-border)' : 'var(--high-risk-border)'),
-                        }}
-                      >
-                        {evt.predicted_class === 'FALL' ? 'HIGH PRIORITY' : 'WARNING'}
                       </span>
                     </td>
                   </tr>

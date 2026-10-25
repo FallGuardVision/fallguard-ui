@@ -454,7 +454,7 @@ function DigitalTwin({ landmarksRef, prediction }) {
       <div className="clinical-card-header">
         <div className="section-title">
           <Box size={15} style={{ color: 'var(--accent)' }} />
-          <span>3D Digital Twin Viewport</span>
+          <span>3D skeleton</span>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -485,10 +485,10 @@ function DigitalTwin({ landmarksRef, prediction }) {
                 border: '1px solid var(--border)',
               }}
             >
-              NO ACTIVE PERSON
+              NO PERSON
             </span>
           )}
-          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>33 KEYPOINTS</span>
+          <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>33 pts</span>
         </div>
       </div>
 
@@ -527,7 +527,7 @@ function DigitalTwin({ landmarksRef, prediction }) {
           {trackingState === 'active' && (
             <>
               <span className={`live-dot ${currentClass === 'FALL' ? 'alert' : ''}`} />
-              <span style={{ color: 'var(--text-primary)' }}>● PERSON DETECTED • 33 KEYPOINTS LIVE</span>
+              <span style={{ color: 'var(--text-primary)' }}>Person detected</span>
             </>
           )}
 
@@ -563,7 +563,7 @@ function DigitalTwin({ landmarksRef, prediction }) {
           }}
         >
           <ShieldCheck size={13} style={{ color: 'var(--accent)' }} />
-          <span>PRIVACY MODE • SKELETON DATA ONLY</span>
+          <span>Skeleton only</span>
         </div>
 
         {/* HUD Bottom-Right: Interactive Controls & Reset View */}
@@ -591,7 +591,7 @@ function DigitalTwin({ landmarksRef, prediction }) {
               gap: 8,
             }}
           >
-            <span><Eye size={10} style={{ display: 'inline', marginRight: 2 }} /> ROTATE / ZOOM / PAN</span>
+            <span><Eye size={10} style={{ display: 'inline', marginRight: 2 }} /> Drag to rotate</span>
           </div>
 
           <button
@@ -638,7 +638,7 @@ function DigitalTwin({ landmarksRef, prediction }) {
               NO PERSON DETECTED
             </p>
             <p style={{ fontSize: 11, color: 'var(--text-muted)' }}>
-              Waiting for valid pose in optical stream
+              Waiting for a person in view
             </p>
           </div>
         )}
@@ -665,7 +665,7 @@ function DigitalTwin({ landmarksRef, prediction }) {
             }}
           >
             <AlertCircle size={14} />
-            <span>POSE TRACKING LOST — WAITING FOR PERSON</span>
+            <span>Tracking lost</span>
           </div>
         )}
       </div>

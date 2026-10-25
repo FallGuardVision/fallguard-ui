@@ -22,7 +22,7 @@ function VideoSource({ onVideoReady }) {
       <div className="clinical-card-header">
         <div className="section-title">
           <Video size={15} style={{ color: 'var(--accent)' }} />
-          <span>Optical Telemetry Source</span>
+          <span>Camera</span>
         </div>
 
         <div style={{ display: 'flex', gap: 6 }}>
@@ -44,7 +44,7 @@ function VideoSource({ onVideoReady }) {
             }}
           >
             <Camera size={13} />
-            Live Camera
+            Live
           </button>
 
           <button
@@ -65,7 +65,7 @@ function VideoSource({ onVideoReady }) {
             }}
           >
             <Upload size={13} />
-            Upload Video
+            Upload
           </button>
         </div>
       </div>

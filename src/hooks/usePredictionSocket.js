@@ -1,11 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { wsUrl } from '../config';
 
-/**
- * Manages a WebSocket connection to the backend's /ws/session endpoint,
- * scoped to a specific patient (patientId is required in the URL so the
- * backend logs any alerts against the right patient record). The hook
- * won't connect until a valid patientId is provided.
- */
 function usePredictionSocket(patientId) {
   const wsRef = useRef(null);
   const [connected, setConnected] = useState(false);
@@ -15,15 +10,13 @@ function usePredictionSocket(patientId) {
   useEffect(() => {
     if (patientId === undefined || patientId === null) return;
 
-    const httpBase = import.meta.env.VITE_API_URL ?? 'http://127.0.0.1:8000';
-    const wsBase = httpBase.replace(/^https/, 'wss').replace(/^http/, 'ws');
-    const url = `${wsBase}/ws/session?patient_id=${patientId}`;
+    const url = wsUrl(`/ws/session?patient_id=${patientId}`);
     const ws = new WebSocket(url);
     wsRef.current = ws;
 
     ws.onopen = () => setConnected(true);
     ws.onclose = () => setConnected(false);
-    ws.onerror = () => setError(`WebSocket connection failed: ${url}`);
+    ws.onerror = () => setError('Could not connect to the prediction server.');
 
     ws.onmessage = (event) => {
       try {

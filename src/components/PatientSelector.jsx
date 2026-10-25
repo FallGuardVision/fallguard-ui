@@ -1,12 +1,9 @@
 import { useEffect, useState } from 'react';
-import { UserPlus, UserCheck, ShieldAlert, Activity, Search } from 'lucide-react';
+import { UserPlus, UserCheck, ShieldAlert, Search } from 'lucide-react';
+import { apiUrl } from '../config';
 
-const API_URL = `${import.meta.env.VITE_API_URL ?? 'http://127.0.0.1:8000'}/patients`;
+const API_URL = apiUrl('/patients');
 
-/**
- * Patient intake portal shown before starting or switching monitoring sessions.
- * Interacts with backend API endpoints GET /patients and POST /patients.
- */
 function PatientSelector({ onSelect }) {
   const [patients, setPatients] = useState([]);
   const [newName, setNewName] = useState('');
@@ -22,7 +19,7 @@ function PatientSelector({ onSelect }) {
         setLoading(false);
       })
       .catch(() => {
-        setError(`Could not reach backend API server at ${API_URL}.`);
+        setError('Could not reach the server.');
         setLoading(false);
       });
   }, []);
@@ -85,10 +82,10 @@ function PatientSelector({ onSelect }) {
         </div>
         <div>
           <h2 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>
-            Patient Session Intake
+            Select patient
           </h2>
           <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 2 }}>
-            Select an active patient record to launch real-time AI optical monitoring.
+            Start monitoring or add a new name.
           </p>
         </div>
       </div>
@@ -120,12 +117,12 @@ function PatientSelector({ onSelect }) {
         }}
       >
         <label style={{ display: 'block', fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 8, textTransform: 'uppercase' }}>
-          Register New Patient
+          New patient
         </label>
         <div style={{ display: 'flex', gap: 8 }}>
           <input
             type="text"
-            placeholder="Enter full patient name (e.g., Margaret Vance)"
+            placeholder="Patient name"
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
             style={{
@@ -156,7 +153,7 @@ function PatientSelector({ onSelect }) {
             }}
           >
             <UserPlus size={15} />
-            Add & Start
+            Start
           </button>
         </div>
       </div>
@@ -165,13 +162,13 @@ function PatientSelector({ onSelect }) {
       <div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
           <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>
-            Existing Patient Roster ({patients.length})
+            Patients ({patients.length})
           </label>
           <div style={{ position: 'relative', width: 180 }}>
             <Search size={12} style={{ position: 'absolute', left: 8, top: 9, color: 'var(--text-muted)' }} />
             <input
               type="text"
-              placeholder="Search roster..."
+              placeholder="Search"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               style={{
@@ -188,11 +185,11 @@ function PatientSelector({ onSelect }) {
         </div>
 
         {loading && (
-          <p style={{ color: 'var(--text-muted)', fontSize: 12, padding: '12px 0' }}>Loading patient roster...</p>
+          <p style={{ color: 'var(--text-muted)', fontSize: 12, padding: '12px 0' }}>Loading...</p>
         )}
 
         {!loading && filteredPatients.length === 0 && (
-          <p style={{ color: 'var(--text-muted)', fontSize: 12, padding: '12px 0' }}>No matching patient records found.</p>
+          <p style={{ color: 'var(--text-muted)', fontSize: 12, padding: '12px 0' }}>No patients found.</p>
         )}
 
         <div style={{ maxHeight: 220, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 6 }}>
@@ -233,7 +230,7 @@ function PatientSelector({ onSelect }) {
                 </div>
                 <div>
                   <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: 13 }}>{p.name}</div>
-                  <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>PAT-2026-00{p.id}</div>
+                  <div style={{ fontSize: 10, color: 'var(--text-muted)' }}>ID {p.id}</div>
                 </div>
               </div>
 

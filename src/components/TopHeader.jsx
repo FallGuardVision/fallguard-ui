@@ -1,4 +1,4 @@
-import { Bell, User, Server, Cpu, Zap, RefreshCw } from 'lucide-react';
+import { Menu, Server, Zap, RefreshCw } from 'lucide-react';
 
 function TopHeader({
   patient,
@@ -6,17 +6,27 @@ function TopHeader({
   backendConnected,
   fps = 0,
   latency = 14,
-  alertCount = 0,
+  sidebarOpen,
+  onToggleSidebar,
 }) {
   return (
     <header className="top-header">
       <div className="header-left">
+        <button
+          className="icon-button"
+          type="button"
+          onClick={onToggleSidebar}
+          aria-label={sidebarOpen ? 'Collapse sidebar' : 'Open sidebar'}
+          aria-expanded={sidebarOpen}
+        >
+          <Menu size={18} />
+        </button>
+
         {patient && (
           <div className="patient-badge-trigger">
-            <span style={{ color: 'var(--text-muted)' }}>Patient:</span>
-            <strong style={{ color: 'var(--text-primary)' }}>{patient.name}</strong>
-            <button onClick={onSwitchPatient} title="Change active patient monitoring session">
-              <RefreshCw size={11} style={{ display: 'inline', marginRight: 2 }} />
+            <strong>{patient.name}</strong>
+            <button type="button" onClick={onSwitchPatient}>
+              <RefreshCw size={11} />
               Switch
             </button>
           </div>
@@ -24,52 +34,20 @@ function TopHeader({
       </div>
 
       <div className="header-telemetry">
-        <div className="telemetry-chip" title="Edge AI Model Engine Status">
-          <Cpu size={14} style={{ color: 'var(--stable)' }} />
-          <span>Edge AI:</span>
-          <strong style={{ color: 'var(--stable)' }}>ONLINE</strong>
-        </div>
-
-        <div className="telemetry-chip" title="Backend WebSocket Server Connection">
+        <div className="telemetry-chip">
           <Server size={14} style={{ color: backendConnected ? 'var(--stable)' : 'var(--fall)' }} />
-          <span>Backend:</span>
           <strong style={{ color: backendConnected ? 'var(--stable)' : 'var(--fall)' }}>
-            {backendConnected ? 'CONNECTED' : 'DISCONNECTED'}
+            {backendConnected ? 'Online' : 'Offline'}
           </strong>
         </div>
 
-        <div className="telemetry-chip" title="Frame Processing Rate">
+        <div className="telemetry-chip">
           <Zap size={14} style={{ color: 'var(--cyan)' }} />
-          <span>FPS:</span>
-          <strong>{fps}</strong>
+          <strong>{fps} fps</strong>
         </div>
 
-        <div className="telemetry-chip" title="Model Inference Latency">
-          <span>Latency:</span>
+        <div className="telemetry-chip">
           <strong>{latency} ms</strong>
-        </div>
-
-        <button className="icon-button" title="System Notifications">
-          <Bell size={16} />
-          {alertCount > 0 && (
-            <span
-              style={{
-                position: 'absolute',
-                top: 4,
-                right: 4,
-                width: 8,
-                height: 8,
-                borderRadius: '50%',
-                background: 'var(--fall)',
-              }}
-            />
-          )}
-        </button>
-
-        <div className="user-profile-tag">
-          <User size={14} style={{ color: 'var(--accent)' }} />
-          <span style={{ fontWeight: 600, color: 'var(--text-primary)' }}>Dr. S. Vance</span>
-          <span style={{ fontSize: 10, color: 'var(--text-muted)' }}>(Shift Alpha)</span>
         </div>
       </div>
     </header>

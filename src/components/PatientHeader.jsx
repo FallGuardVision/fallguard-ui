@@ -1,4 +1,4 @@
-import { Activity, ShieldAlert, HeartPulse } from 'lucide-react';
+import { ShieldAlert } from 'lucide-react';
 
 const CLASS_TO_BADGE_STYLE = {
   STABLE: 'stable',
@@ -35,7 +35,7 @@ function PatientHeader({ patient, prediction }) {
         <div className="patient-avatar-box">{initials}</div>
         <div className="patient-name-id">
           <h2>
-            {patient?.name || 'Unassigned Patient'}
+            {patient?.name || 'Unassigned'}
             <span
               style={{
                 fontSize: 11,
@@ -47,22 +47,9 @@ function PatientHeader({ patient, prediction }) {
                 color: 'var(--text-secondary)',
               }}
             >
-              ID: PAT-2026-00{patient?.id || '0'}
+              ID {patient?.id ?? '—'}
             </span>
           </h2>
-          <div className="patient-meta-text">
-            <span>
-              <Activity size={12} style={{ display: 'inline', marginRight: 4, color: 'var(--accent)' }} />
-              Status: <strong style={{ color: 'var(--text-primary)' }}>ACTIVE POSE MONITORING</strong>
-            </span>
-            <span>•</span>
-            <span>Room 402 / Bed A</span>
-            <span>•</span>
-            <span>
-              <HeartPulse size={12} style={{ display: 'inline', marginRight: 4, color: 'var(--cyan)' }} />
-              HR: 72 bpm
-            </span>
-          </div>
         </div>
       </div>
 
@@ -76,10 +63,10 @@ function PatientHeader({ patient, prediction }) {
               color: 'var(--text-muted)',
               marginBottom: 4,
               fontWeight: 600,
-              textTransform: uppercase(currentClass),
+              textTransform: 'uppercase',
             }}
           >
-            <span>RISK SEVERITY</span>
+            <span>Risk</span>
             <span style={{ color: severity.color }}>{currentClass}</span>
           </div>
           <div
@@ -102,7 +89,7 @@ function PatientHeader({ patient, prediction }) {
         </div>
 
         <div className="prediction-block">
-          <div className="prediction-label">AI Prediction State</div>
+          <div className="prediction-label">Status</div>
           <span className={`status-badge ${badgeStyle}`}>
             <ShieldAlert size={12} />
             {currentClass} ({confidence}%)
@@ -111,10 +98,6 @@ function PatientHeader({ patient, prediction }) {
       </div>
     </div>
   );
-}
-
-function uppercase(str) {
-  return str ? str.toUpperCase() : '';
 }
 
 export default PatientHeader;

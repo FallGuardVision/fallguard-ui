@@ -112,10 +112,10 @@ function VideoUpload({ onVideoReady }) {
         >
           <UploadCloud size={32} style={{ color: 'var(--accent)', marginBottom: 10 }} />
           <p style={{ fontWeight: 600, color: 'var(--text-primary)', marginBottom: 4 }}>
-            Select Video File for Offline Analysis
+            Choose a video
           </p>
           <p style={{ fontSize: 12, color: 'var(--text-secondary)' }}>
-            Supports MP4, WebM, OGG. Runs client-side MediaPipe pose extraction.
+            MP4, WebM, or OGG
           </p>
         </div>
       )}
@@ -258,9 +258,7 @@ function VideoUpload({ onVideoReady }) {
         >
           <CheckCircle2 size={14} />
           <span>
-            {isPlaying
-              ? 'Video playing — real-time pose extraction and fall detection active.'
-              : 'Video ready. Click Play to start real-time pose extraction and fall detection.'}
+            {isPlaying ? 'Detecting pose.' : 'Ready. Press play to start detection.'}
           </span>
         </div>
       )}

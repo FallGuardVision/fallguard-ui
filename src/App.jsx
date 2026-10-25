@@ -12,12 +12,15 @@ import EventHistory from './components/EventHistory';
 import PatientSelector from './components/PatientSelector';
 import usePoseExtraction from './hooks/usePoseExtraction';
 import usePredictionSocket from './hooks/usePredictionSocket';
+import { apiUrl } from './config';
 
 const ALERT_CLASSES = ['HIGH_RISK', 'FALL', 'IMMOBILE'];
 
 function App() {
-  const [activeTab, setActiveTab] = useState('monitoring');
-  const [patient, setPatient] = useState(null); // { id, name }
+  const [sidebarOpen, setSidebarOpen] = useState(() =>
+    typeof window === 'undefined' ? true : window.innerWidth > 768
+  );
+  const [patient, setPatient] = useState(null);
   const [videoElement, setVideoElement] = useState(null);
   const [frameCount, setFrameCount] = useState(0);
   const [fps, setFps] = useState(0);
@@ -31,8 +34,27 @@ function App() {
   const frameCountRef = useRef(0);
 
   const { connected, prediction, error: wsError, sendFrame } = usePredictionSocket(patient?.id);
+  const [serverOk, setServerOk] = useState(false);
 
-  // Measure latency on prediction message receipt from WebSocket
+  useEffect(() => {
+    let cancelled = false;
+    const check = () => {
+      fetch(apiUrl('/'))
+        .then((res) => {
+          if (!cancelled) setServerOk(res.ok);
+        })
+        .catch(() => {
+          if (!cancelled) setServerOk(false);
+        });
+    };
+    check();
+    const interval = setInterval(check, 20000);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
+  }, []);
+
   useEffect(() => {
     if (prediction && lastFrameSendTimeRef.current) {
       const now = performance.now();
@@ -43,8 +65,6 @@ function App() {
     }
   }, [prediction]);
 
-  // Throttle FPS and Frame Count React state updates to 1000ms intervals
-  // to avoid triggering 30 full React tree re-renders per second
   useEffect(() => {
     const interval = setInterval(() => {
       setFrameCount(frameCountRef.current);
@@ -63,21 +83,14 @@ function App() {
 
       if (poseDetected && frame132 && rawLandmarks) {
         frameCountRef.current++;
-
-        // Measure FPS rolling window in ref
         frameTimesRef.current.push(now);
         while (frameTimesRef.current.length > 0 && frameTimesRef.current[0] <= now - 1000) {
           frameTimesRef.current.shift();
         }
-
-        // Record send timestamp & transmit frame over WS silently
         lastFrameSendTimeRef.current = now;
         sendFrame(frame132);
-
-        // Store latest raw landmarks in ref for Digital Twin 60 FPS loop
         latestLandmarksRef.current = rawLandmarks;
       } else {
-        // Person absent: clear ref immediately so no stale pose persists
         latestLandmarksRef.current = null;
       }
     },
@@ -97,58 +110,37 @@ function App() {
 
   return (
     <div className="app-layout">
-      {/* 1. Left Sidebar Shell */}
-      <Sidebar activeTab={activeTab} onTabSelect={setActiveTab} />
+      <Sidebar open={sidebarOpen} />
+      {sidebarOpen && (
+        <div className="sidebar-overlay" onClick={() => setSidebarOpen(false)} />
+      )}
 
-      {/* 2. Main Wrapper */}
       <div className="main-wrapper">
-        {/* 3. Top Header Bar */}
         <TopHeader
           patient={patient}
           onSwitchPatient={() => setPatient(null)}
-          backendConnected={connected}
+          backendConnected={connected || serverOk}
           fps={fps}
           latency={latency}
-          alertCount={currentClass === 'FALL' || currentClass === 'HIGH_RISK' ? 1 : 0}
+          sidebarOpen={sidebarOpen}
+          onToggleSidebar={() => setSidebarOpen((open) => !open)}
         />
 
-        {/* 4. Main Scrollable Content Area */}
         <main className="main-content">
           {!patient ? (
             <PatientSelector onSelect={(id, name) => setPatient({ id, name })} />
           ) : (
             <>
-              {/* Clinical Patient Telemetry Header */}
               <PatientHeader patient={patient} prediction={prediction} />
-
-              {/* Alert Banner for FALL / HIGH_RISK */}
               <AlertBanner predictedClass={currentClass} />
 
-              {wsError && (
-                <div
-                  style={{
-                    padding: '8px 12px',
-                    borderRadius: 4,
-                    background: 'var(--fall-bg)',
-                    border: '1px solid var(--fall-border)',
-                    color: 'var(--fall)',
-                    fontSize: 12,
-                  }}
-                >
-                  WebSocket Telemetry Connection Error: {wsError}
-                </div>
-              )}
+              {wsError && <div className="ws-error">{wsError}</div>}
 
-              {/* Main Monitoring Grid */}
               <div className="monitoring-grid">
-                {/* Left Column: Video Feed (Webcam or Upload) */}
                 <VideoSource onVideoReady={handleVideoReady} />
-
-                {/* Right Column: 3D Digital Twin Skeleton Canvas */}
                 <DigitalTwin landmarksRef={latestLandmarksRef} prediction={prediction} />
               </div>
 
-              {/* Telemetry Metrics Panel */}
               <TelemetryBar
                 prediction={prediction}
                 frameCount={frameCount}
@@ -159,7 +151,6 @@ function App() {
                 poseError={poseError}
               />
 
-              {/* Backend Logged Event History */}
               <EventHistory
                 refreshTrigger={historyRefreshTrigger}
                 patientId={patient.id}

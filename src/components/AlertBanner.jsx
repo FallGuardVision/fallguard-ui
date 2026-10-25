@@ -72,28 +72,9 @@ function AlertBanner({ predictedClass }) {
         )}
         <div>
           <div style={{ fontSize: 13, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            {isFall ? 'CRITICAL EVENT DETECTED — IMMEDIATE PATIENT ATTENTION REQUIRED' : 'HIGH RISK — POSSIBLE FALL IN PROGRESS'}
-          </div>
-          <div style={{ fontSize: 11, fontWeight: 400, opacity: 0.85, marginTop: 2 }}>
-            {isFall
-              ? 'Motion signatures indicate high-velocity descent and impact. Emergency alert logged to station.'
-              : 'Postural dynamics indicate instability or rapid equilibrium deviation.'}
+            {isFall ? 'Fall detected' : 'High fall risk'}
           </div>
         </div>
-      </div>
-
-      <div
-        style={{
-          fontSize: 11,
-          padding: '4px 10px',
-          borderRadius: 4,
-          background: isFall ? 'var(--fall)' : 'var(--high-risk)',
-          color: '#fff',
-          fontWeight: 700,
-          whiteSpace: 'nowrap',
-        }}
-      >
-        {isFall ? 'CODE RED' : 'PRIORITY AMBER'}
       </div>
     </div>
   );

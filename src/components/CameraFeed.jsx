@@ -92,7 +92,7 @@ function CameraFeed({ onVideoReady }) {
             }}
           >
             <span className="live-dot" />
-            <span>LIVE FEED (CAM-01)</span>
+            <span>LIVE</span>
           </div>
 
           <div
@@ -110,7 +110,7 @@ function CameraFeed({ onVideoReady }) {
               color: 'var(--text-secondary)',
             }}
           >
-            HD 30 FPS
+            30 FPS
           </div>
         </>
       )}
@@ -131,7 +131,7 @@ function CameraFeed({ onVideoReady }) {
           }}
         >
           <Camera size={24} style={{ color: 'var(--accent)', animation: 'pulse 1.5s infinite' }} />
-          <p style={{ fontSize: 13 }}>Initializing Optical Sensor...</p>
+          <p style={{ fontSize: 13 }}>Starting camera...</p>
         </div>
       )}
     </div>
