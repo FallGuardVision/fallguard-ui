@@ -1,7 +1,6 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { History, AlertCircle, Clock, CheckCircle2 } from 'lucide-react';
-
-const API_URL = 'http://127.0.0.1:8000/events';
+import { getApiBaseUrl } from '../config/api';
 
 const CLASS_BADGE_STYLE = {
   HIGH_RISK: 'high-risk',
@@ -31,28 +30,37 @@ function EventHistory({ refreshTrigger, patientId, patientName }) {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchEvents = async () => {
+  const fetchEvents = useCallback(async () => {
     try {
-      const url = patientId ? `${API_URL}?patient_id=${patientId}` : API_URL;
+      const apiBase = getApiBaseUrl();
+      const apiUrl = `${apiBase}/events`;
+      const url = patientId ? `${apiUrl}?patient_id=${patientId}` : apiUrl;
       const res = await fetch(url);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       setEvents(data);
       setError(null);
       setLoading(false);
     } catch (e) {
-      setError('Could not reach backend for event history log.');
+      setError(`Could not reach backend events at ${getApiBaseUrl()}`);
       setLoading(false);
     }
-  };
+  }, [patientId]);
 
   useEffect(() => {
     fetchEvents();
-  }, [refreshTrigger, patientId]);
+  }, [fetchEvents, refreshTrigger]);
+
+  useEffect(() => {
+    const handleApiChange = () => fetchEvents();
+    window.addEventListener('fallguard_api_changed', handleApiChange);
+    return () => window.removeEventListener('fallguard_api_changed', handleApiChange);
+  }, [fetchEvents]);
 
   useEffect(() => {
     const interval = setInterval(fetchEvents, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [fetchEvents]);
 
   return (
     <div className="clinical-card">

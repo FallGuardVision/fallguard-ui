@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { getWsBaseUrl } from '../config/api';
 
 /**
  * Manages a WebSocket connection to the backend's /ws/session endpoint,
@@ -11,12 +12,18 @@ function usePredictionSocket(patientId) {
   const [connected, setConnected] = useState(false);
   const [prediction, setPrediction] = useState(null);
   const [error, setError] = useState(null);
+  const [apiTrigger, setApiTrigger] = useState(0);
+
+  useEffect(() => {
+    const handleApiChange = () => setApiTrigger((t) => t + 1);
+    window.addEventListener('fallguard_api_changed', handleApiChange);
+    return () => window.removeEventListener('fallguard_api_changed', handleApiChange);
+  }, []);
 
   useEffect(() => {
     if (patientId === undefined || patientId === null) return;
 
-    const httpBase = import.meta.env.VITE_API_URL ?? 'http://127.0.0.1:8000';
-    const wsBase = httpBase.replace(/^https/, 'wss').replace(/^http/, 'ws');
+    const wsBase = getWsBaseUrl();
     const url = `${wsBase}/ws/session?patient_id=${patientId}`;
     const ws = new WebSocket(url);
     wsRef.current = ws;
@@ -42,7 +49,7 @@ function usePredictionSocket(patientId) {
     return () => {
       ws.close();
     };
-  }, [patientId]);
+  }, [patientId, apiTrigger]);
 
   const sendFrame = useCallback((frame132) => {
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
