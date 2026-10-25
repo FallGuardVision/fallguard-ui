@@ -5,7 +5,8 @@
  * 1. Saved custom URL in localStorage ('FALLGUARD_BACKEND_URL')
  * 2. Vite environment variable import.meta.env.VITE_API_URL
  * 3. Intelligent fallback:
- *    - In browser production (e.g. Vercel, remote web): defaults to the cloud backend (https://fallguard-server.onrender.com)
+ *    - In browser production (e.g. Vercel, remote web): ALWAYS defaults to the cloud backend (https://fallguard-server.onrender.com)
+ *      and automatically purges invalid localhost overrides.
  *    - In local development (localhost / 127.0.0.1): defaults to http://127.0.0.1:8000
  */
 
@@ -13,28 +14,41 @@ const STORAGE_KEY = 'FALLGUARD_BACKEND_URL';
 export const DEFAULT_CLOUD_API = 'https://fallguard-server.onrender.com';
 export const DEFAULT_LOCAL_API = 'http://127.0.0.1:8000';
 
+export function isRemoteHost() {
+  if (typeof window === 'undefined' || !window.location) return false;
+  const host = window.location.hostname;
+  return host !== 'localhost' && host !== '127.0.0.1' && host !== '::1' && !host.endsWith('.local');
+}
+
 export function getApiBaseUrl() {
+  const remote = isRemoteHost();
+
   // 1. Check user override in localStorage
   if (typeof window !== 'undefined') {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved && saved.trim()) {
-      return saved.trim().replace(/\/+$/, '');
+      const clean = saved.trim().replace(/\/+$/, '');
+      // If we are on Vercel/remote and the stored URL is localhost, it's invalid - discard it!
+      if (remote && (clean.includes('127.0.0.1') || clean.includes('localhost'))) {
+        localStorage.removeItem(STORAGE_KEY);
+      } else {
+        return clean;
+      }
     }
   }
 
   // 2. Check build-time environment variable
   if (import.meta.env.VITE_API_URL && import.meta.env.VITE_API_URL.trim()) {
-    return import.meta.env.VITE_API_URL.trim().replace(/\/+$/, '');
+    const envUrl = import.meta.env.VITE_API_URL.trim().replace(/\/+$/, '');
+    // If on remote domain, ignore localhost values baked into build
+    if (!remote || (!envUrl.includes('127.0.0.1') && !envUrl.includes('localhost'))) {
+      return envUrl;
+    }
   }
 
-  // 3. Fallback based on runtime environment
-  if (typeof window !== 'undefined' && window.location) {
-    const host = window.location.hostname;
-    const isLocalhost = host === 'localhost' || host === '127.0.0.1' || host === '::1';
-    if (!isLocalhost) {
-      // Remote / Vercel deployed frontend -> connect to cloud backend
-      return DEFAULT_CLOUD_API;
-    }
+  // 3. Fallback: on remote sites (like Vercel), ALWAYS default to Render Cloud
+  if (remote) {
+    return DEFAULT_CLOUD_API;
   }
 
   return DEFAULT_LOCAL_API;
