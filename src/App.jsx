@@ -12,6 +12,7 @@ import EventHistory from './components/EventHistory';
 import PatientSelector from './components/PatientSelector';
 import usePoseExtraction from './hooks/usePoseExtraction';
 import usePredictionSocket from './hooks/usePredictionSocket';
+import { createLatch, stepLatch, acknowledgeLatch, isUpright, RECOVERY_HOLD_MS } from './utils/alertLatch';
 
 const ALERT_CLASSES = ['HIGH_RISK', 'FALL', 'IMMOBILE'];
 
@@ -29,6 +30,11 @@ function App() {
   const frameTimesRef = useRef([]);
   const lastFrameSendTimeRef = useRef(null);
   const frameCountRef = useRef(0);
+  const uprightRef = useRef(null); // true / false / null (nobody in view)
+  const latchRef = useRef(createLatch());
+  const currentClassRef = useRef('STABLE');
+  const [fallAlert, setFallAlert] = useState({ active: false, since: null });
+  const [recovery, setRecovery] = useState('');
 
   const { connected, prediction, error: wsError, sendFrame } = usePredictionSocket(patient?.id);
 
@@ -70,6 +76,8 @@ function App() {
           frameTimesRef.current.shift();
         }
 
+        uprightRef.current = isUpright(frame132);
+
         // Record send timestamp & transmit frame over WS silently
         lastFrameSendTimeRef.current = now;
         sendFrame(frame132);
@@ -78,6 +86,7 @@ function App() {
         latestLandmarksRef.current = rawLandmarks;
       } else {
         // Person absent: clear ref immediately so no stale pose persists
+        uprightRef.current = null;
         latestLandmarksRef.current = null;
       }
     },
@@ -87,6 +96,64 @@ function App() {
   const { modelReady, error: poseError } = usePoseExtraction(videoElement, handleLandmarks);
 
   const currentClass = prediction?.predicted_class ?? 'STABLE';
+  currentClassRef.current = currentClass;
+
+  // Latch FALL/IMMOBILE alerts until the patient is upright again (or staff acknowledge)
+  useEffect(() => {
+    const id = setInterval(() => {
+      const next = stepLatch(latchRef.current, {
+        cls: currentClassRef.current,
+        upright: uprightRef.current,
+        now: performance.now(),
+      });
+      const prev = latchRef.current;
+      latchRef.current = next;
+      if (next.active !== prev.active) {
+        setFallAlert({ active: next.active, since: next.since });
+      }
+      if (next.active) {
+        const u = uprightRef.current;
+        const status = u === true ? 'upright' : u === false ? 'not upright' : 'person not in view';
+        const held = next.uprightSince ? Math.min(RECOVERY_HOLD_MS, performance.now() - next.uprightSince) : 0;
+        setRecovery(`${status}|${(held / 1000).toFixed(1)}`);
+      }
+    }, 250);
+    return () => clearInterval(id);
+  }, []);
+
+  // New patient session -> start clean
+  useEffect(() => {
+    latchRef.current = createLatch();
+    setFallAlert({ active: false, since: null });
+  }, [patient?.id]);
+
+  // Uploaded video looped/restarted (or scrubbed back) -> that's a new scene, so
+  // end the old alert. "Dismissed" stops it re-latching from the last stale
+  // FALL/IMMOBILE label while the buffer refills.
+  useEffect(() => {
+    if (!videoElement) return undefined;
+    let lastTime = videoElement.currentTime || 0;
+    const onTimeUpdate = () => {
+      const t = videoElement.currentTime;
+      if (t < lastTime - 0.5) {
+        latchRef.current = acknowledgeLatch(latchRef.current);
+        uprightRef.current = null;
+        setFallAlert({ active: false, since: null });
+      }
+      lastTime = t;
+    };
+    videoElement.addEventListener('timeupdate', onTimeUpdate);
+    videoElement.addEventListener('seeked', onTimeUpdate);
+    return () => {
+      videoElement.removeEventListener('timeupdate', onTimeUpdate);
+      videoElement.removeEventListener('seeked', onTimeUpdate);
+    };
+  }, [videoElement]);
+
+  const handleAcknowledge = useCallback(() => {
+    latchRef.current = acknowledgeLatch(latchRef.current);
+    setFallAlert({ active: false, since: null });
+  }, []);
 
   useEffect(() => {
     if (ALERT_CLASSES.includes(currentClass) && currentClass !== lastClassRef.current) {
@@ -109,7 +176,7 @@ function App() {
           backendConnected={connected}
           fps={fps}
           latency={latency}
-          alertCount={currentClass === 'FALL' || currentClass === 'HIGH_RISK' ? 1 : 0}
+          alertCount={fallAlert.active || currentClass === 'HIGH_RISK' ? 1 : 0}
         />
 
         {/* 4. Main Scrollable Content Area */}
@@ -122,7 +189,13 @@ function App() {
               <PatientHeader patient={patient} prediction={prediction} />
 
               {/* Alert Banner for FALL / HIGH_RISK */}
-              <AlertBanner predictedClass={currentClass} />
+              <AlertBanner
+                predictedClass={currentClass}
+                fallActive={fallAlert.active}
+                fallSince={fallAlert.since}
+                recovery={recovery}
+                onAcknowledge={handleAcknowledge}
+              />
 
               {wsError && (
                 <div

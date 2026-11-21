@@ -5,6 +5,7 @@ function CameraFeed({ onVideoReady }) {
   const videoRef = useRef(null);
   const [error, setError] = useState(null);
   const [ready, setReady] = useState(false);
+  const [aspect, setAspect] = useState(null);
 
   useEffect(() => {
     let stream;
@@ -19,6 +20,8 @@ function CameraFeed({ onVideoReady }) {
           videoRef.current.srcObject = stream;
           videoRef.current.onloadedmetadata = () => {
             setReady(true);
+            const v = videoRef.current;
+            if (v && v.videoWidth && v.videoHeight) setAspect(v.videoWidth / v.videoHeight);
             if (onVideoReady) onVideoReady(videoRef.current);
           };
         }
@@ -65,8 +68,9 @@ function CameraFeed({ onVideoReady }) {
         muted
         style={{
           width: '100%',
-          maxHeight: 440,
-          objectFit: 'cover',
+          maxHeight: 480,
+          aspectRatio: aspect || '16 / 9',
+          objectFit: 'contain', // show the full camera frame, no cropping
           display: 'block',
         }}
       />
