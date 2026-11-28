@@ -31,7 +31,7 @@ export function getApiBaseUrl() {
       // If we are on Vercel/remote and the stored URL is localhost, it's invalid - discard it!
       if (remote && (clean.includes('127.0.0.1') || clean.includes('localhost'))) {
         localStorage.removeItem(STORAGE_KEY);
-      } else {
+      } else if (!remote || /^https?:\/\//i.test(clean)) {
         return clean;
       }
     }
